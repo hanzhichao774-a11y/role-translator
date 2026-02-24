@@ -2,6 +2,28 @@
 
 帮助产品经理和开发工程师跨越沟通鸿沟的 AI 翻译工具。将产品需求翻译成技术语言，将技术方案翻译成业务语言。
 
+> **在线演示**：[https://role-translator.onrender.com](https://role-translator.onrender.com)
+
+## 项目预览
+
+<!-- 部署完成后替换为实际截图 -->
+<p align="center">
+  <img src="docs/screenshot-main.png" alt="主界面" width="720" />
+</p>
+
+<p align="center">
+  <img src="docs/screenshot-result.png" alt="翻译结果" width="720" />
+</p>
+
+## 功能特性
+
+- **产品 → 开发**：将产品需求描述翻译成技术方案分析，包含技术选型建议、工作量评估、风险提示
+- **开发 → 产品**：将技术方案翻译成业务影响分析，包含用户体验影响、业务价值、行动建议
+- **产品 → 管理层**：将产品需求翻译成战略决策语言
+- **开发 → 管理层**：将技术方案翻译成管理层能理解的战略分析
+- **智能识别**：自动检测输入内容属于产品视角还是开发视角
+- **流式输出**：实时展示 AI 生成过程，体验流畅
+
 ## 快速开始
 
 ### 1. 安装依赖
@@ -11,14 +33,18 @@ cd role-translator
 pip install -r requirements.txt
 ```
 
-### 2. 配置 API Key
+### 2. 配置环境变量
 
-项目根目录已包含 `.env` 文件，默认使用阿里云 Coding Plan（通义千问）。如需修改，编辑 `.env`：
+复制 `.env.example` 并填入你的 API Key：
+
+```bash
+cp .env.example .env
+```
 
 ```env
 API_KEY=your_api_key_here
 BASE_URL=https://coding.dashscope.aliyuncs.com/v1
-MODEL=qwen-plus
+MODEL=qwen3.5-plus
 ```
 
 支持任何 OpenAI 兼容的 API（如 OpenAI、DeepSeek、智谱等），只需修改对应的 KEY 和 BASE_URL。
@@ -31,23 +57,14 @@ python app.py
 
 打开浏览器访问 http://localhost:8000 即可使用。
 
-## 功能说明
+## 在线部署（Render）
 
-### 核心功能
+本项目已配置 `render.yaml`，可一键部署到 [Render](https://render.com)：
 
-- **产品 → 开发**：将产品需求描述翻译成技术方案分析，包含技术选型建议、工作量评估、风险提示
-- **开发 → 产品**：将技术方案翻译成业务影响分析，包含用户体验影响、业务价值、行动建议
-- **产品 → 管理层**：将产品需求翻译成战略决策语言（加分项）
-- **开发 → 管理层**：将技术方案翻译成管理层能理解的战略分析（加分项）
-- **智能识别**：自动检测输入内容属于产品视角还是开发视角（加分项）
-- **流式输出**：实时展示 AI 生成过程，体验流畅
-
-### 交互方式
-
-1. 选择翻译方向（4 种方向可选）
-2. 在输入框中输入内容（或点击示例快速填充）
-3. 点击"开始翻译"或按 `Ctrl/Cmd + Enter` 发起翻译
-4. 实时查看流式输出的翻译结果
+1. Fork 本仓库到你的 GitHub
+2. 在 Render Dashboard 中选择 **New > Blueprint**，连接你的仓库
+3. 在环境变量中配置 `API_KEY`、`BASE_URL`、`MODEL`
+4. 等待构建完成即可访问
 
 ## 测试用例
 
@@ -96,8 +113,8 @@ python app.py
 
 1. **角色定位明确**：每个方向的 prompt 都明确定义了翻译专家的角色和目标受众
 2. **结构化输出**：使用固定的输出格式模板，确保翻译结果覆盖关键维度
-3. **主动补充机制**：要求 AI 识别输入中缺失的信息并主动补充（如产品没提到的技术约束、开发没提到的业务影响）
-4. **翻译原则约束**：为每个方向设定具体的翻译原则（如"技术具象化"、"业务价值化"），引导 AI 的翻译风格
+3. **主动补充机制**：要求 AI 识别输入中缺失的信息并主动补充
+4. **翻译原则约束**：为每个方向设定具体的翻译原则，引导 AI 的翻译风格
 5. **多角色支持**：除了产品和开发的双向翻译，还支持向管理层翻译，覆盖更多实际场景
 
 ## 技术架构
@@ -112,4 +129,5 @@ python app.py
 
 - **后端**：Python + FastAPI，支持 SSE 流式响应
 - **前端**：原生 HTML + CSS + JavaScript，无框架依赖
-- **AI**：阿里云通义千问 qwen-plus（通过 OpenAI 兼容接口调用）
+- **AI**：阿里云通义千问（通过 OpenAI 兼容接口调用）
+- **部署**：Render（gunicorn + uvicorn worker）
