@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>职能沟通翻译助手</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --product-color: #8b5cf6;
+            --dev-color: #3b82f6;
+            --mgmt-color: #f59e0b;
+            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 32px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+
+        header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 15px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+
+        .section-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .direction-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .direction-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 16px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            background: var(--card-bg);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            color: var(--text);
+            text-align: left;
+        }
+
+        .direction-btn:hover {
+            border-color: var(--primary);
+            background: #f5f3ff;
+        }
+
+        .direction-btn.active {
+            border-color: var(--primary);
+            background: #ede9fe;
+        }
+
+        .direction-btn .arrow {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .direction-btn .label {
+            font-weight: 600;
+        }
+
+        .direction-btn .desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .auto-detect-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            padding: 10px 14px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .auto-detect-bar .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-product {
+            background: #ede9fe;
+            color: var(--product-color);
+        }
+
+        .badge-dev {
+            background: #dbeafe;
+            color: var(--dev-color);
+        }
+
+        .input-area {
+            position: relative;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 140px;
+            padding: 16px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: inherit;
+            line-height: 1.6;
+            resize: vertical;
+            transition: border-color 0.2s;
+            color: var(--text);
+            background: var(--card-bg);
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        textarea::placeholder {
+            color: #94a3b8;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .btn-primary {
+            flex: 1;
+            padding: 14px 24px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            padding: 14px 20px;
+            background: transparent;
+            color: var(--text-secondary);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--text-secondary);
+            color: var(--text);
+        }
+
+        .result-card {
+            display: none;
+        }
+
+        .result-card.visible {
+            display: block;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .result-header .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .tag-dev {
+            background: #dbeafe;
+            color: var(--dev-color);
+        }
+
+        .tag-product {
+            background: #ede9fe;
+            color: var(--product-color);
+        }
+
+        .tag-mgmt {
+            background: #fef3c7;
+            color: var(--mgmt-color);
+        }
+
+        .result-content {
+            font-size: 15px;
+            line-height: 1.8;
+            color: var(--text);
+            white-space: pre-wrap;
+        }
+
+        .result-content h3 {
+            font-size: 16px;
+            margin-top: 20px;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .result-content ul {
+            padding-left: 20px;
+        }
+
+        .result-content li {
+            margin-bottom: 4px;
+        }
+
+        .typing-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1em;
+            background: var(--primary);
+            animation: blink 0.8s infinite;
+            vertical-align: text-bottom;
+            margin-left: 2px;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .loading-dot {
+            display: inline-flex;
+            gap: 4px;
+        }
+
+        .loading-dot span {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--primary);
+            animation: dotPulse 1.2s infinite;
+        }
+
+        .loading-dot span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dot span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes dotPulse {
+            0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+            40% { opacity: 1; transform: scale(1); }
+        }
+
+        .examples {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .example-chip {
+            padding: 6px 14px;
+            background: #f1f5f9;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .example-chip:hover {
+            background: #e2e8f0;
+            color: var(--text);
+        }
+
+        @media (max-width: 640px) {
+            .direction-grid {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                padding: 20px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>职能沟通翻译助手</h1>
+            <p>帮助产品经理和开发工程师跨越沟通鸿沟</p>
+        </header>
+
+        <div class="card">
+            <div class="section-title">选择翻译方向</div>
+            <div class="direction-grid">
+                <button class="direction-btn active" data-direction="product_to_dev" onclick="selectDirection(this)">
+                    <span class="arrow">📦→💻</span>
+                    <div>
+                        <div class="label">产品 → 开发</div>
+                        <div class="desc">将需求描述翻译成技术语言</div>
+                    </div>
+                </button>
+                <button class="direction-btn" data-direction="dev_to_product" onclick="selectDirection(this)">
+                    <span class="arrow">💻→📦</span>
+                    <div>
+                        <div class="label">开发 → 产品</div>
+                        <div class="desc">将技术方案翻译成业务语言</div>
+                    </div>
+                </button>
+                <button class="direction-btn" data-direction="product_to_management" onclick="selectDirection(this)">
+                    <span class="arrow">📦→📊</span>
+                    <div>
+                        <div class="label">产品 → 管理层</div>
+                        <div class="desc">将需求翻译成战略决策语言</div>
+                    </div>
+                </button>
+                <button class="direction-btn" data-direction="dev_to_management" onclick="selectDirection(this)">
+                    <span class="arrow">💻→📊</span>
+                    <div>
+                        <div class="label">开发 → 管理层</div>
+                        <div class="desc">将技术方案翻译成管理语言</div>
+                    </div>
+                </button>
+            </div>
+            <div class="auto-detect-bar" id="autoDetectBar" style="display:none;">
+                <span>🔍 智能识别：输入内容更像</span>
+                <span class="badge" id="detectBadge"></span>
+                <span>的表述</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="section-title">输入内容</div>
+            <div class="input-area">
+                <textarea id="inputText" placeholder="在这里输入产品需求或技术方案...&#10;&#10;例如：我们需要一个智能推荐功能，提升用户停留时长"></textarea>
+            </div>
+            <div class="examples">
+                <span class="example-chip" onclick="fillExample('product')">💡 产品示例</span>
+                <span class="example-chip" onclick="fillExample('dev')">💡 开发示例</span>
+            </div>
+            <div class="actions">
+                <button class="btn-primary" id="translateBtn" onclick="doTranslate()">开始翻译</button>
+                <button class="btn-secondary" onclick="clearAll()">清空</button>
+            </div>
+        </div>
+
+        <div class="card result-card" id="resultCard">
+            <div class="result-header">
+                <div class="section-title" style="margin-bottom:0">翻译结果</div>
+                <span class="tag" id="resultTag"></span>
+            </div>
+            <div class="result-content" id="resultContent"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentDirection = 'product_to_dev';
+        let isTranslating = false;
+        let detectTimer = null;
+
+        const EXAMPLES = {
+            product: '我们需要一个智能推荐功能，根据用户的浏览历史和购买记录，在首页展示个性化的商品推荐，目标是提升用户停留时长和转化率。希望第一期能在下个月上线。',
+            dev: '我们对订单查询接口进行了重构，引入了 Redis 缓存层和读写分离架构，数据库查询 QPS 从 500 提升到了 2000，P99 延迟从 800ms 降低到了 120ms。同时优化了索引结构，存储空间减少了 40%。'
+        };
+
+        const TAG_CONFIG = {
+            product_to_dev: { text: '开发视角', cls: 'tag-dev' },
+            dev_to_product: { text: '产品视角', cls: 'tag-product' },
+            product_to_management: { text: '管理层视角', cls: 'tag-mgmt' },
+            dev_to_management: { text: '管理层视角', cls: 'tag-mgmt' },
+        };
+
+        function selectDirection(btn) {
+            document.querySelectorAll('.direction-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentDirection = btn.dataset.direction;
+        }
+
+        function fillExample(type) {
+            const textarea = document.getElementById('inputText');
+            textarea.value = EXAMPLES[type];
+            if (type === 'product') {
+                document.querySelector('[data-direction="product_to_dev"]').click();
+            } else {
+                document.querySelector('[data-direction="dev_to_product"]').click();
+            }
+            triggerDetect();
+        }
+
+        function clearAll() {
+            document.getElementById('inputText').value = '';
+            document.getElementById('resultCard').classList.remove('visible');
+            document.getElementById('autoDetectBar').style.display = 'none';
+        }
+
+        document.getElementById('inputText').addEventListener('input', function() {
+            clearTimeout(detectTimer);
+            if (this.value.trim().length > 10) {
+                detectTimer = setTimeout(triggerDetect, 800);
+            } else {
+                document.getElementById('autoDetectBar').style.display = 'none';
+            }
+        });
+
+        async function triggerDetect() {
+            const content = document.getElementById('inputText').value.trim();
+            if (content.length < 10) return;
+
+            try {
+                const res = await fetch('/api/detect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content })
+                });
+                const data = await res.json();
+                if (data.role && data.role !== 'unknown') {
+                    const bar = document.getElementById('autoDetectBar');
+                    const badge = document.getElementById('detectBadge');
+                    bar.style.display = 'flex';
+                    if (data.role === 'product') {
+                        badge.textContent = '产品经理';
+                        badge.className = 'badge badge-product';
+                    } else {
+                        badge.textContent = '开发工程师';
+                        badge.className = 'badge badge-dev';
+                    }
+                }
+            } catch (e) {
+                // silent fail
+            }
+        }
+
+        async function doTranslate() {
+            const content = document.getElementById('inputText').value.trim();
+            if (!content) {
+                alert('请输入要翻译的内容');
+                return;
+            }
+            if (isTranslating) return;
+
+            isTranslating = true;
+            const btn = document.getElementById('translateBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading-dot"><span></span><span></span><span></span></span> 翻译中';
+
+            const resultCard = document.getElementById('resultCard');
+            const resultContent = document.getElementById('resultContent');
+            const resultTag = document.getElementById('resultTag');
+
+            resultCard.classList.add('visible');
+            resultContent.innerHTML = '<span class="typing-cursor"></span>';
+
+            const tagCfg = TAG_CONFIG[currentDirection];
+            resultTag.textContent = tagCfg.text;
+            resultTag.className = 'tag ' + tagCfg.cls;
+
+            try {
+                const response = await fetch('/api/translate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content, direction: currentDirection })
+                });
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let fullText = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const text = decoder.decode(value, { stream: true });
+                    const lines = text.split('\n');
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            const data = line.slice(6);
+                            if (data === '[DONE]') continue;
+                            try {
+                                const parsed = JSON.parse(data);
+                                if (parsed.error) {
+                                    resultContent.innerHTML = `<span style="color:#ef4444">错误：${parsed.error}</span>`;
+                                    break;
+                                }
+                                if (parsed.content) {
+                                    fullText += parsed.content;
+                                    resultContent.innerHTML = renderMarkdown(fullText) + '<span class="typing-cursor"></span>';
+                                    resultCard.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                                }
+                            } catch (e) {
+                                // skip malformed JSON
+                            }
+                        }
+                    }
+                }
+
+                resultContent.innerHTML = renderMarkdown(fullText);
+            } catch (e) {
+                resultContent.innerHTML = `<span style="color:#ef4444">请求失败：${e.message}</span>`;
+            } finally {
+                isTranslating = false;
+                btn.disabled = false;
+                btn.textContent = '开始翻译';
+            }
+        }
+
+        function renderMarkdown(text) {
+            return text
+                .replace(/### (.+)/g, '<h3>$1</h3>')
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/^- (.+)/gm, '<li>$1</li>')
+                .replace(/(<li>.*<\/li>)/gs, function(match) {
+                    if (!match.startsWith('<ul>')) return '<ul>' + match + '</ul>';
+                    return match;
+                })
+                .replace(/<\/ul>\s*<ul>/g, '')
+                .replace(/\n\n/g, '<br><br>')
+                .replace(/\n/g, '<br>');
+        }
+
+        document.getElementById('inputText').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                doTranslate();
+            }
+        });
+    </script>
+</body>
+</html>
